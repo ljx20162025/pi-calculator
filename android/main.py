@@ -248,7 +248,6 @@ class ResultView(RecycleView):
 
     def __init__(self, **kwargs):
         super().__init__(do_scroll_x=False, **kwargs)
-        self.viewclass = "LineLabel"
 
         self._layout = RecycleBoxLayout(
             orientation="vertical",
@@ -258,7 +257,12 @@ class ResultView(RecycleView):
             padding=(dp(6), dp(4)),
         )
         self._layout.bind(minimum_height=self._layout.setter("height"))
+        # 顺序很重要：RecycleView.viewclass 是代理到 layout_manager 的
+        # AliasProperty（见 kivy/uix/recycleview/__init__.py 的 _get_viewclass）。
+        # 在 add_widget 之前赋值时 layout_manager 还是 None，赋值会被静默丢掉，
+        # 结果整片空白且不报错。必须先挂上布局，再设 viewclass。
         self.add_widget(self._layout)
+        self.viewclass = "LineLabel"
 
         self._raw = ""
         self.data = [{"text": "选择算法、填入位数，然后点击上方按钮"}]
@@ -279,7 +283,9 @@ class ResultView(RecycleView):
     def set_text(self, text: str):
         self._raw = text
         self._rewrap(self, self.width)
-        self.scroll_y = 1.0  # 回到顶部
+        # 滚动边界要到下一帧布局算完才更新，现在就设 scroll_y 会被旧边界夹紧，
+        # 结果开头几行被卷到视野外面。推迟一帧再回到顶部。
+        Clock.schedule_once(lambda dt: setattr(self, "scroll_y", 1.0), 0)
 
     def _rewrap(self, *_):
         if not self._raw:
