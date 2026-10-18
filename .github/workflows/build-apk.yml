@@ -16,7 +16,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned on purpose - do not change to ubuntu-latest.
+    #
+    # Ubuntu 24.04 ships libtool 2.4.7, which no longer provides the
+    # LT_SYS_SYMBOL_USCORE macro. python-for-android builds libffi 3.4.2,
+    # whose configure.ac still uses it, so autoreconf dies with
+    # "possibly undefined macro: LT_SYS_SYMBOL_USCORE".
+    # Ubuntu 22.04 has libtool 2.4.6 and builds libffi fine.
+    #
+    # Pinning also protects us from the ubuntu-latest -> Ubuntu 26.04
+    # migration, which would otherwise change the OS under our feet.
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -38,7 +48,8 @@ jobs:
           # Core packages - these exist on every recent Ubuntu image.
           sudo apt-get install -y \
             git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
-            zlib1g-dev cmake libffi-dev libssl-dev
+            zlib1g-dev cmake libffi-dev libssl-dev \
+            automake libtool-bin libltdl-dev gperf
           # ncurses / tinfo package names differ by Ubuntu release:
           # libtinfo5 exists on 22.04 but was REMOVED on 24.04 (noble),
           # where only libtinfo6 ships. apt-get aborts the whole command
