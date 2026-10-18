@@ -36,7 +36,14 @@ fullscreen = 0
 android.api = 34
 
 # (int) Minimum API your APK / AAB will support.
-android.minapi = 23
+# Must be >= 24: CPython's remote_debugging.c uses preadv()/pwritev(),
+# which only exist in Android's bionic from API 24 (Android 7.0) onwards.
+# With 23 the NDK headers do not declare them and the build dies with
+# "implicit declaration of function 'preadv' is invalid in C99 [-Werror]".
+android.minapi = 24
+
+# (int) Android NDK API to use - kept in sync with android.minapi.
+android.ndk_api = 24
 
 # (str) Android NDK version to use
 android.ndk = 25b
