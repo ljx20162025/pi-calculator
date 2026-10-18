@@ -59,6 +59,31 @@ jobs:
             || sudo apt-get install -y libncurses-dev libtinfo6 \
             || echo "ncurses/tinfo unavailable - continuing anyway"
 
+      - name: Select Java 17 for Gradle
+        # The Android Gradle Plugin refuses to run on Java 11:
+        #   "Android Gradle plugin requires Java 17 to run.
+        #    You are currently using Java 11."
+        # Ubuntu images ship several JDKs and JAVA_HOME defaults to 11,
+        # so point it at 17 explicitly (and put it first on PATH).
+        run: |
+          JDK17=""
+          for d in "$JAVA_HOME_17_X64" \
+                   /usr/lib/jvm/temurin-17-jdk-amd64 \
+                   /usr/lib/jvm/java-17-openjdk-amd64; do
+            if [ -n "$d" ] && [ -x "$d/bin/java" ]; then JDK17="$d"; break; fi
+          done
+          if [ -z "$JDK17" ]; then
+            echo "::error::Java 17 not found. Available JVMs:"; ls /usr/lib/jvm; exit 1
+          fi
+          echo "JAVA_HOME=$JDK17" >> "$GITHUB_ENV"
+          echo "PATH=$JDK17/bin:$PATH" >> "$GITHUB_ENV"
+
+      - name: Verify toolchain
+        run: |
+          echo "JAVA_HOME = $JAVA_HOME"
+          java -version 2>&1 | head -n 1
+          javac -version 2>&1 | head -n 1
+
       - name: Install Buildozer
         run: |
           python -m pip install --upgrade pip
