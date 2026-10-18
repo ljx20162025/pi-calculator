@@ -20,6 +20,18 @@ source.include_exts = py,png,jpg,kv,atlas
 # (list) Application requirements
 requirements = python3,kivy
 
+# (str) python-for-android version to use.
+#
+# Pinned to v2024.01.21 on purpose. Newer p4a (master / v2026.05.09) builds
+# CPython 3.14.2, whose bundled pip is 26.x. p4a does not patch pip - it makes
+# pip report the Android platform tag by pointing hostpython3 at the target's
+# sysconfigdata. pip 26 changed how the platform tag is derived, so the
+# android-tagged wheels are rejected:
+#   "ERROR: charset_normalizer-3.5.2-cp314-cp314-android_24_arm64_v8a.whl
+#    is not a supported wheel on this platform"
+# v2024.01.21 builds CPython 3.11.5 (pip 23.x), where this still works.
+p4a.branch = v2024.01.21
+
 # (str) Application versioning (method 1)
 version = 1.0
 
