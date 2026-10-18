@@ -44,6 +44,12 @@ android.ndk = 25b
 # (bool) Enable AndroidX support (required by current python-for-android)
 android.enable_androidx = True
 
+# (bool) Automatically accept the Android SDK license agreements.
+# Required in CI: without it sdkmanager prints "Accept? (y/N)", reads EOF,
+# defaults to N, and silently skips build-tools - which later shows up as
+# the misleading "Aidl not found, please install it" error.
+android.accept_sdk_license = True
+
 # (list) Android architecture to build for.
 # arm64-v8a covers virtually all modern phones and builds much faster
 # than also including armeabi-v7a.
