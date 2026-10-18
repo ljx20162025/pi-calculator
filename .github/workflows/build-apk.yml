@@ -35,10 +35,18 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
+          # Core packages - these exist on every recent Ubuntu image.
           sudo apt-get install -y \
             git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
-            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
-            cmake libffi-dev libssl-dev
+            zlib1g-dev cmake libffi-dev libssl-dev
+          # ncurses / tinfo package names differ by Ubuntu release:
+          # libtinfo5 exists on 22.04 but was REMOVED on 24.04 (noble),
+          # where only libtinfo6 ships. apt-get aborts the whole command
+          # if a single name is missing, so try old names, then new ones,
+          # and never let this step fail the build.
+          sudo apt-get install -y libncurses5-dev libncursesw5-dev libtinfo5 \
+            || sudo apt-get install -y libncurses-dev libtinfo6 \
+            || echo "ncurses/tinfo unavailable - continuing anyway"
 
       - name: Install Buildozer
         run: |
@@ -51,6 +59,7 @@ jobs:
 
       - name: Locate APK
         id: locate
+        working-directory: android
         run: |
           APK=$(ls bin/*.apk | head -n 1)
           echo "apk=$APK" >> "$GITHUB_OUTPUT"
@@ -61,3 +70,4 @@ jobs:
         with:
           name: pi-calculator-apk
           path: android/bin/*.apk
+          if-no-files-found: warn
