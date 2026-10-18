@@ -1,0 +1,31 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+
+# ---- PyInstaller (Windows .exe builds) ----
+build/
+dist/
+*.manifest
+/pi.spec
+/pi2.spec
+/pi_all.spec
+
+# ---- Buildozer / Android ----
+.buildozer/
+android/bin/
+android/.buildozer/
+*.apk
+*.aab
+*.apk.idsig
+
+# ---- Editors / OS ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---- WorkBuddy workspace data (local only, do not commit) ----
+.workbuddy/
